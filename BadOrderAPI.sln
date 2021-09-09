@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D478BC34-4C82-459F-99FE-F0A3B88E6DF9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BadOrder.Web", "src\BadOrder.Web\BadOrder.Web.csproj", "{F7387428-4DB6-4BC8-B1E4-31D48B86DFA0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F7387428-4DB6-4BC8-B1E4-31D48B86DFA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7387428-4DB6-4BC8-B1E4-31D48B86DFA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7387428-4DB6-4BC8-B1E4-31D48B86DFA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7387428-4DB6-4BC8-B1E4-31D48B86DFA0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F7387428-4DB6-4BC8-B1E4-31D48B86DFA0} = {D478BC34-4C82-459F-99FE-F0A3B88E6DF9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {49271C1E-CD0A-4C06-A061-4D9E7682AAF0}
+	EndGlobalSection
+EndGlobal
