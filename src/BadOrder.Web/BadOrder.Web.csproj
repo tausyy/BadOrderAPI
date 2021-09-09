@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>cf66080d-b505-423b-ba54-bc4be5c82c26</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\BadOrder.Library\BadOrder.Library.csproj" />
   </ItemGroup>
 
 </Project>
