@@ -9,11 +9,11 @@ namespace BadOrder.Library.Abstractions.DataAccess
 {
     public interface IUsersRepository
     {
-        Task CreateUserAsync(User user);
-        Task DeleteUserAsync(int id);
-        Task<User> GetUserAsync(int id);
+        Task<User> CreateUserAsync(User user);
+        Task DeleteUserAsync(string id);
+        Task<User> GetUserAsync(string id);
         Task<IEnumerable<User>> GetUsersAsync();
-        Task UpdateItemAsync(User user);
+        Task UpdateUserAsync(User user);
 
     }
 }
