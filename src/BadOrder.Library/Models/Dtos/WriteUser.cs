@@ -18,6 +18,7 @@ namespace BadOrder.Library.Models.Dtos
         [MinLength(8, ErrorMessage = "Must be at least {1} characters")]
         public string Password { get; init; }
 
+        [Required]
         [EmailAddress]
         public string Email { get; init; }
 
