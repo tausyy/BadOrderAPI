@@ -11,7 +11,7 @@ using BadOrder.Library.Models.Dtos;
 namespace BadOrder.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _repo;
