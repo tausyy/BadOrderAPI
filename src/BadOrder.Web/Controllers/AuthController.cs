@@ -31,11 +31,11 @@ namespace BadOrder.Web.Controllers
             var user = await _repo.GetUserByEmailAsync(loginUser.Email);
             if (user is null)
             {
-                return BadRequest(new { error = "Email or password provided is invalid" });
+                return BadRequest(new ErrorResponse("Email or password provided is invalid"));
             }
             if (!_authService.VerifyUserPassword(loginUser.Password, user.Password))
             {
-                return BadRequest(new { error = "Email or password provided is invalid" });
+                return BadRequest(new ErrorResponse("Email or password provided is invalid"));
             }
 
             return Ok(new { token = _authService.GenerateJwtToken(user) });
