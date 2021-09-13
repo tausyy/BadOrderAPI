@@ -12,6 +12,7 @@ namespace BadOrder.Library.Abstractions.DataAccess
         Task<User> CreateUserAsync(User user);
         Task DeleteUserAsync(string id);
         Task<User> GetUserAsync(string id);
+        Task<User> GetUserByEmailAsync(string email);
         Task<IEnumerable<User>> GetUsersAsync();
         Task UpdateUserAsync(User user);
 
