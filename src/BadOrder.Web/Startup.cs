@@ -43,7 +43,7 @@ namespace BadOrder.Web
 
             });
 
-            services.AddSingleton<IUsersRepository, MongoUsersRepository>();
+            services.AddSingleton<IUserRepository, MongoUserRepository>();
 
             services.AddControllers(options => {
                 options.SuppressAsyncSuffixInActionNames = false;

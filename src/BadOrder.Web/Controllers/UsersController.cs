@@ -14,9 +14,9 @@ namespace BadOrder.Web.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly IUsersRepository _repo;
+        private readonly IUserRepository _repo;
 
-        public UsersController(IUsersRepository repo)
+        public UsersController(IUserRepository repo)
         {
             _repo = repo;
         }
