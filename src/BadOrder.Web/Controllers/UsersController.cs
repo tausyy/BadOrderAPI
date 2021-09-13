@@ -53,9 +53,9 @@ namespace BadOrder.Web.Controllers
                 DateAdded = DateTimeOffset.UtcNow
             };
             
-            await _repo.CreateUserAsync(user);
+            var createdUser = await _repo.CreateUserAsync(user);
 
-            return CreatedAtAction(nameof(GetUserAsync), new { id = user.Id }, user.AsNewUser());
+            return CreatedAtAction(nameof(GetUserAsync), new { id = createdUser.Id }, createdUser.AsNewUser());
         }
 
         [HttpPut("{id}")]

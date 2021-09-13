@@ -25,8 +25,13 @@ namespace BadOrder.Library.Repositories
         
         public async Task<User> CreateUserAsync(User user)
         {
-            await usersCollection.InsertOneAsync(user);
-            return user;
+            User secureUser = user with
+            {
+                Password = BCrypt.Net.BCrypt.HashPassword(user.Password)
+            };
+
+            await usersCollection.InsertOneAsync(secureUser);
+            return secureUser;
         }
         
         public async Task DeleteUserAsync(string id)
@@ -41,8 +46,11 @@ namespace BadOrder.Library.Repositories
             return await usersCollection.Find(filter).SingleOrDefaultAsync();
         }
 
+
+
         public async Task<IEnumerable<User>> GetUsersAsync() =>
            await usersCollection.Find(new BsonDocument()).ToListAsync();
+
 
         public async Task UpdateUserAsync(User user)
         {
@@ -50,5 +58,10 @@ namespace BadOrder.Library.Repositories
             await usersCollection.ReplaceOneAsync(filter, user);
         }
 
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            var filter = filterBuilder.Eq(findUser => findUser.Email, email);
+            return await usersCollection.Find(filter).FirstOrDefaultAsync();
+        }
     }
 }
