@@ -7,13 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Models;
 using BadOrder.Library.Models.Dtos;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BadOrder.Web.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "Admin")]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _repo;
@@ -43,17 +41,8 @@ namespace BadOrder.Web.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(409)]
         public async Task<ActionResult<User>> CreateUserAsync(WriteUser newUser)
         {
-            var userExists = await _repo.GetUserByEmailAsync(newUser.Email);
-            if (userExists is not null)
-            {
-                return Conflict("Email already in use");
-            }
-
             User user = new()
             {
                 Name = newUser.Name,
@@ -64,9 +53,9 @@ namespace BadOrder.Web.Controllers
                 DateAdded = DateTimeOffset.UtcNow
             };
             
-            var createdUser = await _repo.CreateUserAsync(user);
+            await _repo.CreateUserAsync(user);
 
-            return CreatedAtAction(nameof(GetUserAsync), new { id = createdUser.Id }, createdUser.AsNewUser());
+            return CreatedAtAction(nameof(GetUserAsync), new { id = user.Id }, user.AsNewUser());
         }
 
         [HttpPut("{id}")]
