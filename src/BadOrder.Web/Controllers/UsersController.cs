@@ -56,6 +56,7 @@ namespace BadOrder.Web.Controllers
                 return Conflict("Email already in use");
             }
 
+
             if (newUser.Role != "Admin" && newUser.Role != "User")
             {
                 return BadRequest("Invalid role type");
