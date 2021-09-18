@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-
-using BadOrder.Library.Abstractions.DataAccess;
-using BadOrder.Library.Models;
-using BadOrder.Library.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
+
+using BadOrder.Library.Models;
+using BadOrder.Library.Models.Users;
+using BadOrder.Library.Models.Users.Dtos;
+using BadOrder.Library.Abstractions.DataAccess;
 
 namespace BadOrder.Web.Controllers
 {
@@ -42,7 +43,7 @@ namespace BadOrder.Web.Controllers
             var user = await _repo.GetUserAsync(id);
             if (user is null)
             {
-                return NotFound(new ErrorResponse($"user not found - {id}"));
+                return NotFound(new ErrorResponse { Error = $"user not found - {id}" });
             }
             return Ok(user);
         }
@@ -57,12 +58,12 @@ namespace BadOrder.Web.Controllers
             var userExists = await _repo.GetUserByEmailAsync(newUser.Email);
             if (userExists is not null)
             {
-                return Conflict(new ErrorResponse("Email already in use"));
+                return Conflict(new ErrorResponse{ Error = "Email already in use" } );
             }
 
             if (newUser.Role != "Admin" && newUser.Role != "User")
             {
-                return BadRequest(new ErrorResponse("Invalid role type"));
+                return BadRequest(new ErrorResponse { Error = "Invalid role type" });
             }
 
             User user = new()
@@ -89,7 +90,7 @@ namespace BadOrder.Web.Controllers
             var existingUser = await _repo.GetUserAsync(id);
             if (existingUser is null)
             {
-                return NotFound(new ErrorResponse($"user not found - {id}"));
+                return NotFound(new ErrorResponse { Error = $"user not found - {id}" });
             }
 
             User updatedUser = existingUser with
@@ -115,7 +116,7 @@ namespace BadOrder.Web.Controllers
             var existingUser = await _repo.GetUserAsync(id);
             if (existingUser is null)
             {
-                return NotFound(new ErrorResponse($"user not found - {id}"));
+                return NotFound(new ErrorResponse { Error = $"user not found - {id}" });
             }
 
             await _repo.DeleteUserAsync(id);

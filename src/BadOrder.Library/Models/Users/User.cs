@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadOrder.Library.Models
+namespace BadOrder.Library.Models.Users
 {
     public record User
     {

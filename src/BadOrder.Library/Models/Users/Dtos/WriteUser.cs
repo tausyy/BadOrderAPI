@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadOrder.Library.Models.Dtos
+namespace BadOrder.Library.Models.Users.Dtos
 {
     public record WriteUser
     {

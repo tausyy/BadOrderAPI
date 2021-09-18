@@ -1,4 +1,5 @@
-﻿using BadOrder.Library.Models.Dtos;
+﻿using BadOrder.Library.Models.Users;
+using BadOrder.Library.Models.Users.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models
 {
-    public static class UserModelExtensions
+    public static class ModelExtensions
     {
         public static NewUser AsNewUser(this User user) =>
             new()

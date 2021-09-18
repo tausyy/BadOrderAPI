@@ -1,5 +1,5 @@
 ﻿using BadOrder.Library.Abstractions.DataAccess;
-using BadOrder.Library.Models;
+using BadOrder.Library.Models.Users;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;

@@ -4,7 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadOrder.Library.Models.Dtos
+namespace BadOrder.Library.Models
 {
-    public record ErrorResponse(string error);
+    public record ErrorResponse
+    {
+        public string Error { get; init; }
+    }
 }

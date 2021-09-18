@@ -1,6 +1,6 @@
 ﻿using BadOrder.Library.Abstractions.Authentication;
 using BadOrder.Library.Abstractions.DataAccess;
-using BadOrder.Library.Models;
+using BadOrder.Library.Models.Users;
 using BadOrder.Library.Settings;
 using Microsoft.IdentityModel.Tokens;
 using System;

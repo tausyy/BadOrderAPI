@@ -1,7 +1,7 @@
 ﻿using BadOrder.Library.Abstractions.Authentication;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Models;
-using BadOrder.Library.Models.Dtos;
+using BadOrder.Library.Models.Users.Dtos;
 using BadOrder.Library.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,11 +34,11 @@ namespace BadOrder.Web.Controllers
             var user = await _repo.GetUserByEmailAsync(loginUser.Email);
             if (user is null)
             {
-                return BadRequest(new ErrorResponse("Email or password provided is invalid"));
+                return BadRequest(new ErrorResponse { Error = "Email or password provided is invalid" });
             }
             if (!_authService.VerifyUserPassword(loginUser.Password, user.Password))
             {
-                return BadRequest(new ErrorResponse("Email or password provided is invalid"));
+                return BadRequest(new ErrorResponse { Error = "Email or password provided is invalid" });
             }
 
             return Ok(new AuthSuccess { Token = _authService.GenerateJwtToken(user) });
