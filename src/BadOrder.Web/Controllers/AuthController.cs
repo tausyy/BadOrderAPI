@@ -1,5 +1,6 @@
 ﻿using BadOrder.Library.Abstractions.Authentication;
 using BadOrder.Library.Abstractions.DataAccess;
+using BadOrder.Library.Models;
 using BadOrder.Library.Models.Dtos;
 using BadOrder.Library.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,8 +13,8 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Web.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IUserRepository _repo;
@@ -26,7 +27,9 @@ namespace BadOrder.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Login(LoginUser loginUser)
+        [ProducesResponseType(200, Type = typeof(AuthSuccess))]
+        [ProducesResponseType(400, Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> Login(LoginUser loginUser)
         {
             var user = await _repo.GetUserByEmailAsync(loginUser.Email);
             if (user is null)
@@ -38,7 +41,7 @@ namespace BadOrder.Web.Controllers
                 return BadRequest(new ErrorResponse("Email or password provided is invalid"));
             }
 
-            return Ok(new { token = _authService.GenerateJwtToken(user) });
+            return Ok(new AuthSuccess { Token = _authService.GenerateJwtToken(user) });
         }
     }
 }
