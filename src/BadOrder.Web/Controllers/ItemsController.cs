@@ -23,7 +23,7 @@ namespace BadOrder.Web.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Roles = "Admin, User")]
+        [Authorize(Roles = "Admin, User")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
         public async Task<IActionResult> GetItemsAsync()
         {
@@ -32,6 +32,7 @@ namespace BadOrder.Web.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin, User")]
         [ProducesResponseType(200, Type = typeof(Item))]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetItemAsync(string id)
@@ -41,6 +42,7 @@ namespace BadOrder.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(201, Type = typeof(Item))]
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         [ProducesResponseType(409, Type = typeof(ErrorResponse))]
@@ -58,6 +60,7 @@ namespace BadOrder.Web.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> UpdateItemAsync(string id, WriteItem item)
@@ -76,19 +79,19 @@ namespace BadOrder.Web.Controllers
             };
 
             await _repo.UpdateItemAsync(updatedItem);
-
             return NoContent();
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> DeleteItemAsync(string id)
         {
-            var existingUser = await _repo.GetItemAsync(id);
-            if (existingUser is null)
+            var existingItem = await _repo.GetItemAsync(id);
+            if (existingItem is null)
             {
-                return existingUser.NotFound(id);
+                return existingItem.NotFound(id);
             }
 
             await _repo.DeleteItemAsync(id);
