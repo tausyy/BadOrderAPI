@@ -1,5 +1,7 @@
 using BadOrder.Library.Abstractions.Authentication;
 using BadOrder.Library.Abstractions.DataAccess;
+using BadOrder.Library.Models;
+using BadOrder.Library.Models.Items;
 using BadOrder.Library.Repositories;
 using BadOrder.Library.Services;
 using BadOrder.Library.Settings;
@@ -16,12 +18,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BadOrder.Web
@@ -39,12 +43,14 @@ namespace BadOrder.Web
         public void ConfigureServices(IServiceCollection services)
         {
             BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
+
             var mongoDbSettings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
             services.AddSingleton<IMongoClient>(serviceProvider =>
             {
                 return new MongoClient(mongoDbSettings.ConnectionString);
             });
             services.AddSingleton<IUserRepository, MongoUserRepository>();
+            services.AddSingleton<IItemRepository, MongoItemRepository>();
 
             var jwtTokenSettings = Configuration.GetSection(nameof(JwtTokenSettings)).Get<JwtTokenSettings>();
             services.AddSingleton(jwtTokenSettings);
@@ -70,8 +76,19 @@ namespace BadOrder.Web
 
             services.AddTransient<AuthService>();
 
-            services.AddControllers(options => {
+            services.AddControllers(options =>
+            {
                 options.SuppressAsyncSuffixInActionNames = false;
+            }).AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            }).ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = actionContext =>
+                {
+                    var modelState = actionContext.ModelState;
+                    return new BadRequestObjectResult(modelState.ToErrorResponseModel());
+                };
             });
 
             services.AddSwaggerGen(c =>

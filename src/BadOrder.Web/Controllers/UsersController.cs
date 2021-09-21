@@ -26,7 +26,6 @@ namespace BadOrder.Web.Controllers
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
-        [ProducesResponseType(401)]
         public async Task<IActionResult> GetUsersAsync()
         {
             var users = await _repo.GetUsersAsync();
@@ -36,21 +35,15 @@ namespace BadOrder.Web.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
-        [ProducesResponseType(401)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetUserAsync(string id)
         {
             var user = await _repo.GetUserAsync(id);
-            if (user is null)
-            {
-                return NotFound(new ErrorResponse { Error = $"user not found - {id}" });
-            }
-            return Ok(user);
+            return (user is null) ? user.NotFound(id) : Ok(user);
         }
 
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(NewUser))]
-        [ProducesResponseType(401)]
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         [ProducesResponseType(409, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> CreateUserAsync(WriteUser newUser)
@@ -58,12 +51,12 @@ namespace BadOrder.Web.Controllers
             var userExists = await _repo.GetUserByEmailAsync(newUser.Email);
             if (userExists is not null)
             {
-                return Conflict(new ErrorResponse{ Error = "Email already in use" } );
+                return newUser.EmailInUse();
             }
 
             if (newUser.Role != "Admin" && newUser.Role != "User")
             {
-                return BadRequest(new ErrorResponse { Error = "Invalid role type" });
+                return newUser.InvalidRole();
             }
 
             User user = new()
@@ -83,14 +76,13 @@ namespace BadOrder.Web.Controllers
 
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> UpdateUserAsync(string id, WriteUser user)
         {
             var existingUser = await _repo.GetUserAsync(id);
             if (existingUser is null)
             {
-                return NotFound(new ErrorResponse { Error = $"user not found - {id}" });
+                return existingUser.NotFound(id);
             }
 
             User updatedUser = existingUser with
@@ -109,14 +101,13 @@ namespace BadOrder.Web.Controllers
 
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> DeleteUserAsync(string id)
         {
             var existingUser = await _repo.GetUserAsync(id);
             if (existingUser is null)
             {
-                return NotFound(new ErrorResponse { Error = $"user not found - {id}" });
+                return existingUser.NotFound(id);
             }
 
             await _repo.DeleteUserAsync(id);

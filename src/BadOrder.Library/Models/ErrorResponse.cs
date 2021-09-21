@@ -8,6 +8,6 @@ namespace BadOrder.Library.Models
 {
     public record ErrorResponse
     {
-        public string Error { get; init; }
+        public ErrorEntry[] Errors { get; init; }
     }
 }

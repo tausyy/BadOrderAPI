@@ -32,13 +32,11 @@ namespace BadOrder.Web.Controllers
         public async Task<IActionResult> Login(LoginUser loginUser)
         {
             var user = await _repo.GetUserByEmailAsync(loginUser.Email);
-            if (user is null)
+            if (user is null || 
+                !_authService.VerifyUserPassword(loginUser.Password, user.Password))
             {
-                return BadRequest(new ErrorResponse { Error = "Email or password provided is invalid" });
-            }
-            if (!_authService.VerifyUserPassword(loginUser.Password, user.Password))
-            {
-                return BadRequest(new ErrorResponse { Error = "Email or password provided is invalid" });
+                var error = new ErrorEntry{ Message = "Email or password provided is invalid" };
+                return BadRequest(new ErrorResponse { Errors = new[] { error } });
             }
 
             return Ok(new AuthSuccess { Token = _authService.GenerateJwtToken(user) });
