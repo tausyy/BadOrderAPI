@@ -1,10 +1,7 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Items
@@ -13,7 +10,7 @@ namespace BadOrder.Library.Models.Items
     {
         Any,
         Boxes,
-        Packs,
+        Bags,
         Pounds
     }
 }

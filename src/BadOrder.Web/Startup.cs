@@ -1,5 +1,6 @@
 using BadOrder.Library.Abstractions.Authentication;
 using BadOrder.Library.Abstractions.DataAccess;
+using BadOrder.Library.Converters;
 using BadOrder.Library.Models;
 using BadOrder.Library.Models.Items;
 using BadOrder.Library.Repositories;
@@ -25,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -79,11 +81,15 @@ namespace BadOrder.Web
             services.AddControllers(options =>
             {
                 options.SuppressAsyncSuffixInActionNames = false;
-            }).AddJsonOptions(options =>
+            })
+            .AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            }).ConfigureApiBehaviorOptions(options =>
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.Converters.Add(new UnitTypeEnumConverter());
+            })
+            .ConfigureApiBehaviorOptions(options =>
             {
+                //options.SuppressMapClientErrors = true;
                 options.InvalidModelStateResponseFactory = actionContext =>
                 {
                     var modelState = actionContext.ModelState;
@@ -111,8 +117,6 @@ namespace BadOrder.Web
 
             app.UseRouting();
             app.UseAuthentication();
-            app.UseAuthorization();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

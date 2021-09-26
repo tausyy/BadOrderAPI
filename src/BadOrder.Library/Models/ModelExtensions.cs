@@ -1,6 +1,7 @@
 ﻿using BadOrder.Library.Models.Items;
 using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
@@ -18,6 +19,8 @@ namespace BadOrder.Library.Models
         private const string InvalidRoleError = "Invalid role";
 
         private const string ItemNotFoundError = "Item not found";
+
+        private const string EnumErrorMagic = "enumError";
 
         public static NewUser AsNewUser(this User user) =>
             new()
@@ -54,6 +57,7 @@ namespace BadOrder.Library.Models
             return new NotFoundObjectResult(new ErrorResponse { Errors = new[] { error } });
 
         }
+
         public static ErrorResponse ToErrorResponseModel(this ModelStateDictionary modelState)
         {
             List<ErrorEntry> errors = new();
@@ -61,17 +65,35 @@ namespace BadOrder.Library.Models
             {
                 foreach(var err in modelState[key].Errors)
                 {
-                    errors.Add(new ErrorEntry
-                    {
-                       // Exception = err.Exception,
-                        Field = key,
-                        Value = modelState[key].AttemptedValue,
-                        Message = err.ErrorMessage,
-                    });
-                }
-            }
 
+                    errors.Add( err.isEnumError()
+                        ? err.toEnumError()
+                        : new ErrorEntry
+                        { 
+                            Field = key,
+                            Value = modelState[key].AttemptedValue,
+                            Message = err.ErrorMessage,
+                        });
+                } 
+            }
             return new ErrorResponse() { Errors = errors.ToArray() };
         }
+
+ 
+
+        private static bool isEnumError(this ModelError model) =>
+            model.ErrorMessage.StartsWith(EnumErrorMagic);
+
+        private static ErrorEntry toEnumError(this ModelError model)
+        {
+            var errorParts = model.ErrorMessage.Split('\n');
+            return new ErrorEntry()
+            {
+                Field = errorParts[1],
+                Value = errorParts[2],
+                Message = errorParts[3]
+            };
+        }
+
     }
 }

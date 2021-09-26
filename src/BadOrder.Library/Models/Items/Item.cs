@@ -20,8 +20,6 @@ namespace BadOrder.Library.Models.Items
         
         public int? ProductNumber { get; init; }
 
-        [BsonRepresentation(BsonType.String)]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public UnitTypes UnitType { get; init; } = UnitTypes.Any;
     }
 }

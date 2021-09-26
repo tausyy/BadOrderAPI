@@ -1,4 +1,4 @@
-﻿using BadOrder.Library.Attributes;
+﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
@@ -20,8 +20,6 @@ namespace BadOrder.Library.Models.Items.Dtos
         public int? ProductNumber { get; init; }
 
         [Required]
-        [ValidEnum]
-        [BsonRepresentation(BsonType.String)]
         public UnitTypes UnitType { get; init; } = UnitTypes.Any;
     }
 }
