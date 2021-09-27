@@ -3,6 +3,7 @@ using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Converters;
 using BadOrder.Library.Models;
 using BadOrder.Library.Models.Items;
+using BadOrder.Library.Models.Users;
 using BadOrder.Library.Repositories;
 using BadOrder.Library.Services;
 using BadOrder.Library.Settings;
@@ -47,12 +48,15 @@ namespace BadOrder.Web
             BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
 
             var mongoDbSettings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
+            services.AddSingleton(mongoDbSettings);
             services.AddSingleton<IMongoClient>(serviceProvider =>
             {
                 return new MongoClient(mongoDbSettings.ConnectionString);
             });
+            
+            services.AddSingleton(typeof(ICrudRepository<>), typeof(MongoCrudRepository<>));
             services.AddSingleton<IUserRepository, MongoUserRepository>();
-            services.AddSingleton<IItemRepository, MongoItemRepository>();
+            //services.AddSingleton<IOrderRepository, MongoOrderRepository>();
 
             var jwtTokenSettings = Configuration.GetSection(nameof(JwtTokenSettings)).Get<JwtTokenSettings>();
             services.AddSingleton(jwtTokenSettings);

@@ -27,8 +27,6 @@ namespace BadOrder.Library.Models.Users.Dtos
         public string PhoneNumber { get; init; }
 
         [Required]
-        [MaxLength(15, ErrorMessage = "Must be less than {1} characters")]
-        [MinLength(4, ErrorMessage = "Must be at least {1} characters")]
         public string Role { get; set; }
     }
 }

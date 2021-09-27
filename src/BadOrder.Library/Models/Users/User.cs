@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Users
 {
-    public record User
+    public record User : ModelBase
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; init; }
         public string Name { get; init; }
         public string Password { get; init; }
         public string Email { get; init; }

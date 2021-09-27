@@ -21,6 +21,30 @@ namespace BadOrder.Library.Models
         private const string ItemNotFoundError = "Item not found";
 
         private const string EnumErrorMagic = "enumError";
+        public static User AsSecureUser(this WriteUser user, string hashedPassword) =>
+            new()
+            {
+                Name = user.Name,
+                Password = hashedPassword,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Role = user.Role,
+                DateAdded = DateTimeOffset.UtcNow
+            };
+
+        public static User AsUpdatedUser(this User user, WriteUser inputUser, string hashedPassword)
+        {
+            User updatedUser = user with
+            {
+                Name = inputUser.Name,
+                Password = hashedPassword,
+                Email = inputUser.Email,
+                PhoneNumber = inputUser.PhoneNumber,
+                Role = inputUser.Role
+            };
+            return updatedUser;
+        }
+        
 
         public static NewUser AsNewUser(this User user) =>
             new()

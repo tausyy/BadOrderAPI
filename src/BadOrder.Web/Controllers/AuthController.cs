@@ -1,6 +1,7 @@
 ﻿using BadOrder.Library.Abstractions.Authentication;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Models;
+using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
 using BadOrder.Library.Services;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> Login(LoginUser loginUser)
         {
-            var user = await _repo.GetUserByEmailAsync(loginUser.Email);
+            var user = await _repo.GetByEmailAsync(loginUser.Email);
             if (user is null || 
                 !_authService.VerifyUserPassword(loginUser.Password, user.Password))
             {

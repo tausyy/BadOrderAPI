@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadOrder.Library.Models.Orders
+namespace BadOrder.Library.Models
 {
-    public record Order : ModelBase
+    public record ModelBase
     {
-        public DateTimeOffset DateCreated { get; init; }
-        public IEnumerable<OrderItem> OrderList { get; init; }
-
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; init; }
     }
 }

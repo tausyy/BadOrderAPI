@@ -15,15 +15,27 @@ namespace BadOrder.Library.Services
 {
     public class AuthService
     {
-
+        
         private readonly JwtTokenSettings _jwtTokenSettings;
         private readonly byte[] _secret;
+
+        private readonly string _adminRole = "Admin";
+        private readonly string _userRole = "User";
 
         public AuthService(JwtTokenSettings jwtTokenSettings)
         {
             _jwtTokenSettings = jwtTokenSettings;
             _secret = Encoding.UTF8.GetBytes(_jwtTokenSettings.Secret);
         }
+
+        public string AdminRole => _adminRole;
+        public string UserRole => _userRole;
+
+        public bool IsAuthRole(string role) =>
+            role.ToLower() == _adminRole.ToLower() || role.ToLower() == _userRole.ToLower();
+
+        public string HashPassword(string password) =>
+            BCrypt.Net.BCrypt.HashPassword(password);
 
         public bool VerifyUserPassword(string loginPassword, string storedPassword) =>
             BCrypt.Net.BCrypt.Verify(loginPassword, storedPassword);

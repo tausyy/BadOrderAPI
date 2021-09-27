@@ -16,8 +16,8 @@ namespace BadOrder.Web.Controllers
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase
     {
-        private readonly IItemRepository _repo;
-        public ItemsController(IItemRepository repo)
+        private readonly ICrudRepository<Item> _repo;
+        public ItemsController(ICrudRepository<Item> repo)
         {
             _repo = repo;
         }
@@ -27,7 +27,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
         public async Task<IActionResult> GetItemsAsync()
         {
-            var items = await _repo.GetItemsAsync();
+            var items = await _repo.GetAllAsync();
             return Ok(items);
         }
 
@@ -37,7 +37,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetItemAsync(string id)
         {
-            var item = await _repo.GetItemAsync(id);
+            var item = await _repo.GetAsync(id);
             return (item is null) ? item.NotFound(id) : Ok(item);
         }
 
@@ -55,7 +55,7 @@ namespace BadOrder.Web.Controllers
                 UnitType = newItem.UnitType
             };
 
-            var createdItem = await _repo.CreateItemAsync(item);
+            var createdItem = await _repo.CreateAsync(item);
             return CreatedAtAction(nameof(GetItemAsync), new { id = createdItem.Id }, createdItem);
         }
 
@@ -65,7 +65,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> UpdateItemAsync(string id, WriteItem item)
         {
-            var existingItem = await _repo.GetItemAsync(id);
+            var existingItem = await _repo.GetAsync(id);
             if (existingItem is null)
             {
                 return existingItem.NotFound(id);
@@ -78,7 +78,7 @@ namespace BadOrder.Web.Controllers
                 UnitType = item.UnitType
             };
 
-            await _repo.UpdateItemAsync(updatedItem);
+            await _repo.UpdateAsync(updatedItem);
             return NoContent();
         }
 
@@ -88,13 +88,13 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> DeleteItemAsync(string id)
         {
-            var existingItem = await _repo.GetItemAsync(id);
+            var existingItem = await _repo.GetAsync(id);
             if (existingItem is null)
             {
                 return existingItem.NotFound(id);
             }
 
-            await _repo.DeleteItemAsync(id);
+            await _repo.DeleteAsync(id);
             return NoContent();
         }
     }

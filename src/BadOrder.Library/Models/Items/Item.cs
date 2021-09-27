@@ -10,12 +10,8 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Items
 {
-    public record Item
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; init; }
-        
+    public record Item : ModelBase
+    {   
         public string ProductName { get; init; }
         
         public int? ProductNumber { get; init; }
