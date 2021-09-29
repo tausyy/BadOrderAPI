@@ -19,9 +19,9 @@ namespace BadOrder.Web.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserRepository _repo;
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public AuthController(IUserRepository repo, AuthService authService)
+        public AuthController(IUserRepository repo, IAuthService authService)
         {
             _repo = repo;
             _authService = authService;

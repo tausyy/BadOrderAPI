@@ -10,6 +10,7 @@ using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Services;
+using BadOrder.Library.Abstractions.Authentication;
 
 namespace BadOrder.Web.Controllers
 {
@@ -18,10 +19,10 @@ namespace BadOrder.Web.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
         private readonly IUserRepository _repo;
 
-        public UsersController(IUserRepository repo, AuthService authService)
+        public UsersController(IUserRepository repo, IAuthService authService)
         {
             _repo = repo;
             _authService = authService;

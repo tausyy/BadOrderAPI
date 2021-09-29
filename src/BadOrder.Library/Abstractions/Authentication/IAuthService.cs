@@ -1,6 +1,6 @@
 ﻿using BadOrder.Library.Models.Users;
 
-namespace BadOrder.Library.Services
+namespace BadOrder.Library.Abstractions.Authentication
 {
     public interface IAuthService
     {

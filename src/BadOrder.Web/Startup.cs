@@ -1,7 +1,5 @@
 using BadOrder.Library.Converters;
 using BadOrder.Library.Models;
-using BadOrder.Library.Services;
-using BadOrder.Library.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -26,26 +24,7 @@ namespace BadOrder.Web
         {
             services.ConfigureMongo(Configuration);
             services.ConfigureAuthentication(Configuration);
-
-            services.AddTransient<AuthService>();
-
-            services.AddControllers(options =>
-            {
-                options.SuppressAsyncSuffixInActionNames = false;
-            })
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-                options.JsonSerializerOptions.Converters.Add(new UnitTypeEnumConverter());
-            })
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.InvalidModelStateResponseFactory = actionContext =>
-                {
-                    var modelState = actionContext.ModelState;
-                    return new BadRequestObjectResult(modelState.ToErrorResponseModel());
-                };
-            });
+            services.ConfigureControllers();
 
             services.AddSwaggerGen(c =>
             {
