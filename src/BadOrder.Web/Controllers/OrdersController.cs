@@ -20,10 +20,14 @@ namespace BadOrder.Web.Controllers
             _repo = orderRepository;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetOrdersAsync()
-        //{
-        //    var orders = await _repo.
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetOrderAsync()
+        {
+            var orders = await _repo.GetAllAsync();
+            return Ok(orders);
+        }
+
+
+
     }
 }

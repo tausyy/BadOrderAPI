@@ -16,7 +16,7 @@ namespace BadOrder.Library.Repositories
         protected readonly string _collectionName;
         protected readonly IMongoCollection<T> _mongoCollection;
         protected readonly FilterDefinitionBuilder<T> filterBuilder = Builders<T>.Filter;
-
+      //  protected readonly FilterDefinition<T> filterById<S> where S: String = filterBuilder.Eq(model => model.Id, id);
         public MongoCrudRepository(MongoDbSettings settings, IMongoClient mongoClient)
         {
             if (string.IsNullOrWhiteSpace(settings.DatabaseName)) 

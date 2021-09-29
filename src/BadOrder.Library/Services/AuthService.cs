@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
-        
+
         private readonly JwtTokenSettings _jwtTokenSettings;
         private readonly byte[] _secret;
 
