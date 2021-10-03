@@ -28,6 +28,20 @@ namespace BadOrder.Library.Repositories
             _mongoCollection = database.GetCollection<T>(_collectionName);
         }
 
+        //public MongoCrudRepository(MongoDbSettings settings, IMongoClient mongoClient, string collectionName)
+        //{
+        //    if (string.IsNullOrWhiteSpace(settings.DatabaseName))
+        //        throw new ArgumentException("DatabaseName is not set");
+
+        //    if (string.IsNullOrWhiteSpace(collectionName))
+        //        throw new ArgumentException("Collection name cannot be empty");
+
+        //    _collectionName = collectionName;
+
+        //    IMongoDatabase database = mongoClient.GetDatabase(settings.DatabaseName);
+        //    _mongoCollection = database.GetCollection<T>(_collectionName);
+        //}
+
         public async Task<T> CreateAsync(T model)
         {
             await _mongoCollection.InsertOneAsync(model);

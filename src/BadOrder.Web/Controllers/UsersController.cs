@@ -65,7 +65,7 @@ namespace BadOrder.Web.Controllers
 
             var hashedPassword = _authService.HashPassword(newUser.Password);
             var createdUser = await _repo.CreateAsync(newUser.AsSecureUser(hashedPassword));
-
+            
             return CreatedAtAction(nameof(GetUserAsync), new { id = createdUser.Id }, createdUser.AsNewUser());
         }
 

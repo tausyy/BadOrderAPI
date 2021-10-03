@@ -1,4 +1,5 @@
 ﻿using BadOrder.Library.Models.Items;
+using BadOrder.Library.Models.Orders;
 using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
 using Microsoft.AspNetCore.Http;
@@ -14,23 +15,31 @@ namespace BadOrder.Library.Models
 {
     public static class ModelExtensions
     {
-        private const string UserNotFoundError = "User not found";
+        private const string EnumErrorMagic = "enumError";
+        
         private const string EmailInUseError = "Email already in use";
         private const string InvalidRoleError = "Invalid role";
+        private static string NotFoundMessage(string modelName) => $"{modelName} not found"; 
+        
+        public static User AsSecureUser(this WriteUser user, string hashedPassword) => new()
+        {
+            Name = user.Name,
+            Password = hashedPassword,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            DateAdded = DateTimeOffset.UtcNow
+        };
 
-        private const string ItemNotFoundError = "Item not found";
-
-        private const string EnumErrorMagic = "enumError";
-        public static User AsSecureUser(this WriteUser user, string hashedPassword) =>
-            new()
-            {
-                Name = user.Name,
-                Password = hashedPassword,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Role = user.Role,
-                DateAdded = DateTimeOffset.UtcNow
-            };
+        public static NewUser AsNewUser(this User user) => new()
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            DateAdded = user.DateAdded
+        };
 
         public static User AsUpdatedUser(this User user, WriteUser inputUser, string hashedPassword)
         {
@@ -45,24 +54,6 @@ namespace BadOrder.Library.Models
             return updatedUser;
         }
         
-
-        public static NewUser AsNewUser(this User user) =>
-            new()
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Role = user.Role,
-                DateAdded = user.DateAdded
-            };
-
-        public static IActionResult NotFound(this User user, string id)
-        {
-            var error = new ErrorEntry { Field = nameof(user.Id), Value = id, Message = UserNotFoundError };
-            return new NotFoundObjectResult(new ErrorResponse { Errors = new[] { error } });
-        }
-
         public static IActionResult EmailInUse(this WriteUser user)
         {
             var error = new ErrorEntry { Field = nameof(user.Email), Value = user.Email, Message = EmailInUseError };
@@ -75,12 +66,21 @@ namespace BadOrder.Library.Models
             return new BadRequestObjectResult(new ErrorResponse { Errors = new[] { error } });
         }
 
-        public static IActionResult NotFound(this Item item, string id)
-        {
-            var error = new ErrorEntry { Field = nameof(item.Id), Value = id, Message = ItemNotFoundError };
-            return new NotFoundObjectResult(new ErrorResponse { Errors = new[] { error } });
+        public static IActionResult NotFound(this Order model, string id) =>
+            new NotFoundObjectResult(new ErrorResponse { Errors = new[] { NotFoundErrorEntry(nameof(Order), id) } });
 
-        }
+        public static IActionResult NotFound(this Item model, string id) =>
+            new NotFoundObjectResult(new ErrorResponse { Errors = new[] { NotFoundErrorEntry(nameof(Item), id) } });
+
+        public static IActionResult NotFound(this User model, string id) =>
+            new NotFoundObjectResult(new ErrorResponse { Errors = new[] { NotFoundErrorEntry(nameof(User), id) } });
+
+        private static ErrorEntry NotFoundErrorEntry(string nameOfModel, string id) => new()
+        { 
+            Field = nameof(ModelBase.Id), 
+            Value = id, 
+            Message = NotFoundMessage(nameOfModel) 
+        };
 
         public static ErrorResponse ToErrorResponseModel(this ModelStateDictionary modelState)
         {
@@ -102,8 +102,6 @@ namespace BadOrder.Library.Models
             }
             return new ErrorResponse() { Errors = errors.ToArray() };
         }
-
- 
 
         private static bool isEnumError(this ModelError model) =>
             model.ErrorMessage.StartsWith(EnumErrorMagic);

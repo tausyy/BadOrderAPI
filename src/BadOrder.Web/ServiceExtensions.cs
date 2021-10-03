@@ -25,7 +25,7 @@ namespace BadOrder.Web
     public static class ServiceExtensions
     {
 
-        public static void ConfigureControllers(this IServiceCollection services)
+        public static IServiceCollection ConfigureControllers(this IServiceCollection services)
         {
             services.AddControllers(options =>
             {
@@ -44,9 +44,11 @@ namespace BadOrder.Web
                     return new BadRequestObjectResult(modelState.ToErrorResponseModel());
                 };
             });
+
+            return services;
         }
 
-        public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtTokenSettings = configuration.GetSection(nameof(JwtTokenSettings)).Get<JwtTokenSettings>();
             services.AddSingleton(jwtTokenSettings);
@@ -71,9 +73,10 @@ namespace BadOrder.Web
             });
 
             services.AddTransient<IAuthService, AuthService>();
+            return services;
         }
 
-        public static void ConfigureMongo(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection ConfigureMongo(this IServiceCollection services, IConfiguration configuration)
         {
             BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
             var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
@@ -81,6 +84,9 @@ namespace BadOrder.Web
             services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoDbSettings.ConnectionString));
             services.AddSingleton(typeof(ICrudRepository<>), typeof(MongoCrudRepository<>));
             services.AddSingleton<IUserRepository, MongoUserRepository>();
+            services.AddSingleton<IOrderRepository, MongoOrderRepository>();
+            services.AddScoped<IOrderService, OrderService>();
+            return services;
         }
     }
 }

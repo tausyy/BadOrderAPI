@@ -2,6 +2,7 @@
 using BadOrder.Library.Models;
 using BadOrder.Library.Models.Items;
 using BadOrder.Library.Models.Items.Dtos;
+using BadOrder.Library.Models.Orders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

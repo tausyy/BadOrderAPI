@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Orders.Dtos
 {
-    public record WriteOrder
+    public record NewOrderRequest
     {
-        [Required]
+        [Required] 
         public IEnumerable<OrderItem> OrderList { get; init; }
     }
 }
