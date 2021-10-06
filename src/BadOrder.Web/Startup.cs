@@ -23,6 +23,8 @@ namespace BadOrder.Web
             services.ConfigureAuthentication(Configuration);
             services.ConfigureControllers();
 
+            services.AddHttpContextAccessor();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BadOrder.Web", Version = "v1" });

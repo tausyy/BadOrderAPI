@@ -1,4 +1,4 @@
-﻿using BadOrder.Library.Abstractions.Authentication;
+﻿using BadOrder.Library.Abstractions.Services;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Models;
 using BadOrder.Library.Models.Users;
@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+
+#nullable enable
 
 namespace BadOrder.Web.Controllers
 {
@@ -32,12 +34,11 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> Login(LoginUser loginUser)
         {
-            var user = await _repo.GetByEmailAsync(loginUser.Email);
-            if (user is null || 
-                !_authService.VerifyUserPassword(loginUser.Password, user.Password))
+            User? user = await _repo.GetByEmailAsync(loginUser.Email);
+
+            if (!_authService.VerifyUserPassword(loginUser.Password, user?.Password))
             {
-                var error = new ErrorEntry{ Message = "Email or password provided is invalid" };
-                return BadRequest(new ErrorResponse { Errors = new[] { error } });
+                return user.AuthFailed();
             }
 
             return Ok(new AuthSuccess { Token = _authService.GenerateJwtToken(user) });

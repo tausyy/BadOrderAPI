@@ -1,4 +1,4 @@
-﻿using BadOrder.Library.Abstractions.Authentication;
+﻿using BadOrder.Library.Abstractions.Services;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Models.Users;
 using BadOrder.Library.Settings;
@@ -10,6 +10,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+
+#nullable enable
 
 namespace BadOrder.Library.Services
 {
@@ -34,12 +36,16 @@ namespace BadOrder.Library.Services
         public bool IsAuthRole(string role) =>
             role.ToLower() == _adminRole.ToLower() || role.ToLower() == _userRole.ToLower();
 
-        public string HashPassword(string password) =>
+        public string HashPassword(string password) => 
             BCrypt.Net.BCrypt.HashPassword(password);
 
-        public bool VerifyUserPassword(string loginPassword, string storedPassword) =>
-            BCrypt.Net.BCrypt.Verify(loginPassword, storedPassword);
-
+        public bool VerifyUserPassword(string loginPassword, string? storedPassword) => 
+            string.IsNullOrWhiteSpace(storedPassword) switch
+            {
+                true => false,
+                false => BCrypt.Net.BCrypt.Verify(loginPassword, storedPassword)
+            };
+            
         public string GenerateJwtToken(User user)
         {
             var claims = new Claim[]

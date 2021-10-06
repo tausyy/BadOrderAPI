@@ -10,7 +10,7 @@ using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Services;
-using BadOrder.Library.Abstractions.Authentication;
+using BadOrder.Library.Abstractions.Services;
 
 namespace BadOrder.Web.Controllers
 {
@@ -21,11 +21,13 @@ namespace BadOrder.Web.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IUserRepository _repo;
+        private readonly IUserService _userService;
 
-        public UsersController(IUserRepository repo, IAuthService authService)
+        public UsersController(IUserRepository repo, IAuthService authService, IUserService userService)
         {
             _repo = repo;
             _authService = authService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -50,29 +52,16 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(201, Type = typeof(NewUser))]
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         [ProducesResponseType(409, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> CreateUserAsync(WriteUser newUser)
+        public async Task<IActionResult> CreateUserAsync(NewUserRequest newUser)
         {
-            var userExists = await _repo.GetByEmailAsync(newUser.Email);
-            if (userExists is not null)
-            {
-                return newUser.EmailInUse();
-            }
-
-            if (!_authService.IsAuthRole(newUser.Role))
-            {
-                return newUser.InvalidRole();
-            }
-
-            var hashedPassword = _authService.HashPassword(newUser.Password);
-            var createdUser = await _repo.CreateAsync(newUser.AsSecureUser(hashedPassword));
-            
-            return CreatedAtAction(nameof(GetUserAsync), new { id = createdUser.Id }, createdUser.AsNewUser());
+            var result = await _userService.CreateAsync(newUser);
+            return result.AsActionResult(nameof(GetUserAsync), nameof(UsersController));
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> UpdateUserAsync(string id, WriteUser user)
+        public async Task<IActionResult> UpdateUserAsync(string id, NewUserRequest user)
         {
             var existingUser = await _repo.GetAsync(id);
             if (existingUser is null)

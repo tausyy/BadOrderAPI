@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Users.Dtos
 {
-    public record WriteUser
+    public record NewUserRequest
     {
         [Required]
         [MaxLength(20, ErrorMessage = "Must be less than {1} characters")]

@@ -1,4 +1,4 @@
-﻿using BadOrder.Library.Abstractions.Authentication;
+﻿using BadOrder.Library.Abstractions.Services;
 using BadOrder.Library.Abstractions.DataAccess;
 using BadOrder.Library.Converters;
 using BadOrder.Library.Models;
@@ -79,13 +79,18 @@ namespace BadOrder.Web
         public static IServiceCollection ConfigureMongo(this IServiceCollection services, IConfiguration configuration)
         {
             BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
+            
             var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
             services.AddSingleton(mongoDbSettings);
             services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoDbSettings.ConnectionString));
+            
             services.AddSingleton(typeof(ICrudRepository<>), typeof(MongoCrudRepository<>));
             services.AddSingleton<IUserRepository, MongoUserRepository>();
             services.AddSingleton<IOrderRepository, MongoOrderRepository>();
+            
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IUserService, UserService>();
+            
             return services;
         }
     }

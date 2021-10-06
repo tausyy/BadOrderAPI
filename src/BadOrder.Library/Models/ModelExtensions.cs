@@ -1,5 +1,7 @@
-﻿using BadOrder.Library.Models.Items;
+﻿using BadOrder.Library.Abstractions.Services;
+using BadOrder.Library.Models.Items;
 using BadOrder.Library.Models.Orders;
+using BadOrder.Library.Models.Services;
 using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
 using Microsoft.AspNetCore.Http;
@@ -19,16 +21,35 @@ namespace BadOrder.Library.Models
         
         private const string EmailInUseError = "Email already in use";
         private const string InvalidRoleError = "Invalid role";
-        private static string NotFoundMessage(string modelName) => $"{modelName} not found"; 
-        
-        public static User AsSecureUser(this WriteUser user, string hashedPassword) => new()
+        private const string AuthFailedError = "Email or password provided is invalid";
+
+        private static string NotFoundMessage(string modelName) => $"{modelName} not found";
+
+        public static IActionResult AsActionResult(this OrderResult result) => result switch
         {
-            Name = user.Name,
-            Password = hashedPassword,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            Role = user.Role,
-            DateAdded = DateTimeOffset.UtcNow
+            OrderFound order => new OkObjectResult(order.Result),
+            OrderCreated order => new OkObjectResult(order.Result),
+            OrderNotFound order => new NotFoundObjectResult(order.Result.AsErrorResonse()),
+            OrderUnauthorized order => new UnauthorizedObjectResult(order.Result.AsErrorResonse()),
+            OrderUpdated or OrderDeleted => new NoContentResult(), 
+            _ => new StatusCodeResult(500)
+        };
+
+        public static IActionResult AsActionResult(this UserResult result) => result switch
+        {
+
+            _ => new StatusCodeResult(500)
+        };
+
+        public static IActionResult AsActionResult(this UserResult result, string actionName, string controllerName) => result switch
+        {
+            EmailInUse request => new ConflictObjectResult(request.Result.AsErrorResonse()),
+            InvalidUserRole request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
+            
+            UserCreated request => 
+                new CreatedAtActionResult(actionName, controllerName, new { id = request.Result.Id }, request.Result.AsNewUser()),
+           
+            _ => new StatusCodeResult(500)
         };
 
         public static NewUser AsNewUser(this User user) => new()
@@ -41,7 +62,7 @@ namespace BadOrder.Library.Models
             DateAdded = user.DateAdded
         };
 
-        public static User AsUpdatedUser(this User user, WriteUser inputUser, string hashedPassword)
+        public static User AsUpdatedUser(this User user, NewUserRequest inputUser, string hashedPassword)
         {
             User updatedUser = user with
             {
@@ -53,16 +74,15 @@ namespace BadOrder.Library.Models
             };
             return updatedUser;
         }
-        
-        public static IActionResult EmailInUse(this WriteUser user)
-        {
-            var error = new ErrorEntry { Field = nameof(user.Email), Value = user.Email, Message = EmailInUseError };
-            return new ConflictObjectResult(new ErrorResponse { Errors = new[] { error } });
-        }
 
-        public static IActionResult InvalidRole(this WriteUser user)
+        public static ErrorResponse AsErrorResonse(this ErrorEntry error) =>
+            new ErrorResponse { Errors = new[] { error } };
+
+
+
+        public static IActionResult AuthFailed(this User _)
         {
-            var error = new ErrorEntry { Field = nameof(user.Role), Value = user.Role, Message = InvalidRoleError };
+            var error = new ErrorEntry { Message = AuthFailedError };
             return new BadRequestObjectResult(new ErrorResponse { Errors = new[] { error } });
         }
 
@@ -116,6 +136,8 @@ namespace BadOrder.Library.Models
                 Message = errorParts[3]
             };
         }
+
+
 
     }
 }
