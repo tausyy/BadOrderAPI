@@ -87,7 +87,8 @@ namespace BadOrder.Web
             services.AddSingleton(typeof(ICrudRepository<>), typeof(MongoCrudRepository<>));
             services.AddSingleton<IUserRepository, MongoUserRepository>();
             services.AddSingleton<IOrderRepository, MongoOrderRepository>();
-            
+
+            services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IUserService, UserService>();
             

@@ -78,7 +78,7 @@ namespace BadOrder.Library.Services
             }
 
             var hashedPassword = _authService.HashPassword(request.Password);
-            var updatedUser = AsUpdatedUser(existingUser, request, hashedPassword);
+            var updatedUser = ToUpdatedUser(existingUser, request, hashedPassword);
 
             await _userRepository.UpdateAsync(updatedUser);
 
@@ -111,7 +111,7 @@ namespace BadOrder.Library.Services
             return new AuthenticateSuccess(new { token });
         }
 
-        private static User AsUpdatedUser(User user, UpdateUserRequest request, string hashedPassword)
+        private static User ToUpdatedUser(User user, UpdateUserRequest request, string hashedPassword)
         {
             User updatedUser = user with
             {

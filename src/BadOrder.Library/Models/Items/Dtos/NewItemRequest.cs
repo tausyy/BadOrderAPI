@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Items.Dtos
 {
-    public record WriteItem
+    public record NewItemRequest
     {
         [Required]
         [MaxLength(50, ErrorMessage = "Must be less than {1} characters")]

@@ -21,6 +21,14 @@ namespace BadOrder.Library.Models
 
         private static string NotFoundMessage(string modelName) => $"{modelName} not found";
 
+        public static IActionResult AsActionResult(this ItemResult result, string actionName = default, string controllerName = default) => result switch
+        {
+            ItemFound item => new OkObjectResult(item.Result),
+            ItemCreated request =>
+                new CreatedAtActionResult(actionName, controllerName, new { id = request.Result.Id }, request.Result),
+            _ => new StatusCodeResult(500)
+        };
+
         public static IActionResult AsActionResult(this OrderResult result) => result switch
         {
             OrderFound order => new OkObjectResult(order.Result),

@@ -47,7 +47,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(201, Type = typeof(Item))]
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         [ProducesResponseType(409, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> CreateItemAsync(WriteItem newItem)
+        public async Task<IActionResult> CreateItemAsync(NewItemRequest newItem)
         {
             Item item = new()
             {
@@ -64,7 +64,7 @@ namespace BadOrder.Web.Controllers
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> UpdateItemAsync(string id, WriteItem item)
+        public async Task<IActionResult> UpdateItemAsync(string id, NewItemRequest item)
         {
             var existingItem = await _repo.GetByIdAsync(id);
             if (existingItem is null)
