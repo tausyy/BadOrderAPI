@@ -33,48 +33,48 @@ namespace BadOrder.Library.Services
 
             if (!_authService.IsAuthRole(request.Role))
             {
-                return new InvalidUserRole(InvalidRoleError(request.Role));
+                return new InvalidRole(InvalidRoleError(request.Role));
             }
 
             var hashedPassword = _authService.HashPassword(request.Password);
             var secureUser = ToSecureUser(request, hashedPassword);
 
             var createdUser = await _userRepository.CreateAsync(secureUser);
-            return new UserCreated(createdUser);
+            return new Created(createdUser);
         }
 
         public async Task<UserResult> GetAllAsync()
         {
             var result = await _userRepository.GetAllAsync();
-            return new AllUsers(result);
+            return new All(result);
         }
 
         public async Task<UserResult> GetByIdAsync(string id)
         {
-            var result = await _userRepository.GetAsync(id);
+            var result = await _userRepository.GetByIdAsync(id);
             return (result is null)
-                ? new UserNotFound(NotFoundError(nameof(id), id))
-                : new UserFound(result);
+                ? new NotFound(NotFoundError(nameof(id), id))
+                : new Found(result);
         }
         public async Task<UserResult> GetByEmailAsync(string email)
         {
             var result = await _userRepository.GetByEmailAsync(email);
             return (result is null)
-                ? new UserNotFound(NotFoundError(nameof(email), email))
-                : new UserFound(result);
+                ? new NotFound(NotFoundError(nameof(email), email))
+                : new Found(result);
         }
 
         public async Task<UserResult> UpdateAsync(string id, UpdateUserRequest request)
         {
-            var existingUser = await _userRepository.GetAsync(id);
+            var existingUser = await _userRepository.GetByIdAsync(id);
             if (existingUser is null)
             {
-                return new UserNotFound(NotFoundError(nameof(id), id));
+                return new NotFound(NotFoundError(nameof(id), id));
             }
 
             if (!_authService.IsAuthRole(request.Role))
             {
-                return new InvalidUserRole(InvalidRoleError(request.Role));
+                return new InvalidRole(InvalidRoleError(request.Role));
             }
 
             var hashedPassword = _authService.HashPassword(request.Password);
@@ -82,12 +82,33 @@ namespace BadOrder.Library.Services
 
             await _userRepository.UpdateAsync(updatedUser);
 
-            return NoContent();
+            return new Updated();
         }
 
-        public Task<UserResult> DeleteAsync(string id)
+        public async Task<UserResult> DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            var existingUser = await _userRepository.GetByIdAsync(id);
+            if (existingUser is null)
+            {
+                return new NotFound(NotFoundError(nameof(id), id));
+            }
+
+            await _userRepository.DeleteAsync(id);
+            return new Deleted();
+        }
+
+        public async Task<UserResult> AuthenticateAsync(AuthenticateUserRequest request)
+        {
+            User user = await _userRepository.GetByEmailAsync(request.Email);
+
+            if (!_authService.VerifyUserPassword(request.Password, user?.Password))
+            {
+                return new AuthenticateFailur(AuthenticateFailedError());
+            }
+
+            var token = _authService.GenerateJwtToken(user);
+
+            return new AuthenticateSuccess(new { token });
         }
 
         private static User AsUpdatedUser(User user, UpdateUserRequest request, string hashedPassword)
@@ -115,9 +136,15 @@ namespace BadOrder.Library.Services
 
         private static ErrorEntry NotFoundError(string field, string value) => new()
             { Field = field, Value = value, Message = "User not found" };
+
         private static ErrorEntry EmailInUserError(string email) => new()
             { Field = nameof(email), Value = email, Message = "Email or password provided is invalid" };
+
         private static ErrorEntry InvalidRoleError(string role) => new()
             { Field = nameof(role), Value = role, Message = "Invalid role" };
+
+        public static ErrorEntry AuthenticateFailedError() => new()
+            { Message = "Email or password provided is invalid" };
+
     }
 }

@@ -16,5 +16,6 @@ namespace BadOrder.Library.Abstractions.Services
         Task<UserResult> GetByEmailAsync(string email);
         Task<UserResult> UpdateAsync(string id, UpdateUserRequest request);
         Task<UserResult> DeleteAsync(string id);
+        Task<UserResult> AuthenticateAsync(AuthenticateUserRequest request);
     }
 }

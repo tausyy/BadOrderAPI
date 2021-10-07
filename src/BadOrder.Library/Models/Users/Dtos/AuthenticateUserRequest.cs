@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BadOrder.Library.Models.Users.Dtos
 {
-    public record LoginUser
+    public record AuthenticateUserRequest
     {
         [Required]
         [EmailAddress]

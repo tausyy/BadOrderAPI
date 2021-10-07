@@ -18,10 +18,6 @@ namespace BadOrder.Library.Models
     public static class ModelExtensions
     {
         private const string EnumErrorMagic = "enumError";
-        
-        private const string EmailInUseError = "Email already in use";
-        private const string InvalidRoleError = "Invalid role";
-        private const string AuthFailedError = "Email or password provided is invalid";
 
         private static string NotFoundMessage(string modelName) => $"{modelName} not found";
 
@@ -35,56 +31,23 @@ namespace BadOrder.Library.Models
             _ => new StatusCodeResult(500)
         };
 
-        public static IActionResult AsActionResult(this UserResult result) => result switch
-        {
-
-            _ => new StatusCodeResult(500)
-        };
-
-        public static IActionResult AsActionResult(this UserResult result, string actionName, string controllerName) => result switch
+        public static IActionResult AsActionResult(this UserResult result, string actionName = default, string controllerName = default) => result switch
         {
             EmailInUse request => new ConflictObjectResult(request.Result.AsErrorResonse()),
-            InvalidUserRole request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
-            
-            UserCreated request => 
-                new CreatedAtActionResult(actionName, controllerName, new { id = request.Result.Id }, request.Result.AsNewUser()),
+            InvalidRole request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
+            AuthenticateFailur request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
+            AuthenticateSuccess request => new OkObjectResult(request.Result),
+            All request => new OkObjectResult(request.Result),
+            Found request => new OkObjectResult(request.Result),
+            Updated or Deleted => new NoContentResult(),
+            Created request =>  
+                new CreatedAtActionResult(actionName, controllerName, new { id = request.Result.Id }, request.Result),
            
             _ => new StatusCodeResult(500)
         };
 
-        public static NewUser AsNewUser(this User user) => new()
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            Role = user.Role,
-            DateAdded = user.DateAdded
-        };
-
-        public static User AsUpdatedUser(this User user, NewUserRequest inputUser, string hashedPassword)
-        {
-            User updatedUser = user with
-            {
-                Name = inputUser.Name,
-                Password = hashedPassword,
-                Email = inputUser.Email,
-                PhoneNumber = inputUser.PhoneNumber,
-                Role = inputUser.Role
-            };
-            return updatedUser;
-        }
-
         public static ErrorResponse AsErrorResonse(this ErrorEntry error) =>
-            new ErrorResponse { Errors = new[] { error } };
-
-
-
-        public static IActionResult AuthFailed(this User _)
-        {
-            var error = new ErrorEntry { Message = AuthFailedError };
-            return new BadRequestObjectResult(new ErrorResponse { Errors = new[] { error } });
-        }
+            new() { Errors = new[] { error } };
 
         public static IActionResult NotFound(this Order model, string id) =>
             new NotFoundObjectResult(new ErrorResponse { Errors = new[] { NotFoundErrorEntry(nameof(Order), id) } });
@@ -96,10 +59,10 @@ namespace BadOrder.Library.Models
             new NotFoundObjectResult(new ErrorResponse { Errors = new[] { NotFoundErrorEntry(nameof(User), id) } });
 
         private static ErrorEntry NotFoundErrorEntry(string nameOfModel, string id) => new()
-        { 
-            Field = nameof(ModelBase.Id), 
-            Value = id, 
-            Message = NotFoundMessage(nameOfModel) 
+        {
+            Field = nameof(ModelBase.Id),
+            Value = id,
+            Message = NotFoundMessage(nameOfModel)
         };
 
         public static ErrorResponse ToErrorResponseModel(this ModelStateDictionary modelState)
@@ -110,8 +73,8 @@ namespace BadOrder.Library.Models
                 foreach(var err in modelState[key].Errors)
                 {
 
-                    errors.Add( err.isEnumError()
-                        ? err.toEnumError()
+                    errors.Add( err.IsEnumError()
+                        ? err.ToEnumError()
                         : new ErrorEntry
                         { 
                             Field = key,
@@ -123,10 +86,10 @@ namespace BadOrder.Library.Models
             return new ErrorResponse() { Errors = errors.ToArray() };
         }
 
-        private static bool isEnumError(this ModelError model) =>
+        private static bool IsEnumError(this ModelError model) =>
             model.ErrorMessage.StartsWith(EnumErrorMagic);
 
-        private static ErrorEntry toEnumError(this ModelError model)
+        private static ErrorEntry ToEnumError(this ModelError model)
         {
             var errorParts = model.ErrorMessage.Split('\n');
             return new ErrorEntry()

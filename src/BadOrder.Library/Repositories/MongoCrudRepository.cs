@@ -57,7 +57,7 @@ namespace BadOrder.Library.Repositories
         public async Task<IEnumerable<T>> GetAllAsync() =>
             await _mongoCollection.Find(new BsonDocument()).ToListAsync();
 
-        public async Task<T> GetAsync(string id)
+        public async Task<T> GetByIdAsync(string id)
         {
             var filter = filterBuilder.Eq(model => model.Id, id);
             return await _mongoCollection.Find(filter).SingleOrDefaultAsync();

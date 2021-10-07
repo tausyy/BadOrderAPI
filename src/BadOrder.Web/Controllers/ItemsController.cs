@@ -38,7 +38,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetItemAsync(string id)
         {
-            var item = await _repo.GetAsync(id);
+            var item = await _repo.GetByIdAsync(id);
             return (item is null) ? item.NotFound(id) : Ok(item);
         }
 
@@ -66,7 +66,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> UpdateItemAsync(string id, WriteItem item)
         {
-            var existingItem = await _repo.GetAsync(id);
+            var existingItem = await _repo.GetByIdAsync(id);
             if (existingItem is null)
             {
                 return existingItem.NotFound(id);
@@ -89,7 +89,7 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> DeleteItemAsync(string id)
         {
-            var existingItem = await _repo.GetAsync(id);
+            var existingItem = await _repo.GetByIdAsync(id);
             if (existingItem is null)
             {
                 return existingItem.NotFound(id);

@@ -11,7 +11,7 @@ namespace BadOrder.Library.Abstractions.DataAccess
     {
         Task<T> CreateAsync(T model);
         Task DeleteAsync(string id);
-        Task<T> GetAsync(string id);
+        Task<T> GetByIdAsync(string id);
         Task<IEnumerable<T>> GetAllAsync();
         Task UpdateAsync(T model);
     }
