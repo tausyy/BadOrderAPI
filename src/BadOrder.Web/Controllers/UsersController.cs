@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-
+using BadOrder.Library.Abstractions.Services;
 using BadOrder.Library.Models;
+using BadOrder.Library.Models.Services;
 using BadOrder.Library.Models.Users;
 using BadOrder.Library.Models.Users.Dtos;
-using BadOrder.Library.Abstractions.DataAccess;
-using BadOrder.Library.Services;
-using BadOrder.Library.Abstractions.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BadOrder.Web.Controllers
 {

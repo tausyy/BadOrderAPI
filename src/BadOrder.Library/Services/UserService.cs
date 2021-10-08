@@ -40,13 +40,13 @@ namespace BadOrder.Library.Services
             var secureUser = ToSecureUser(request, hashedPassword);
 
             var createdUser = await _userRepository.CreateAsync(secureUser);
-            return new Created(createdUser);
+            return new UserCreated(createdUser);
         }
 
         public async Task<UserResult> GetAllAsync()
         {
             var result = await _userRepository.GetAllAsync();
-            return new All(result);
+            return new AllUsers(result);
         }
 
         public async Task<UserResult> GetByIdAsync(string id)
@@ -54,14 +54,14 @@ namespace BadOrder.Library.Services
             var result = await _userRepository.GetByIdAsync(id);
             return (result is null)
                 ? new NotFound(NotFoundError(nameof(id), id))
-                : new Found(result);
+                : new UserFound(result);
         }
         public async Task<UserResult> GetByEmailAsync(string email)
         {
             var result = await _userRepository.GetByEmailAsync(email);
             return (result is null)
                 ? new NotFound(NotFoundError(nameof(email), email))
-                : new Found(result);
+                : new UserFound(result);
         }
 
         public async Task<UserResult> UpdateAsync(string id, UpdateUserRequest request)
@@ -82,7 +82,7 @@ namespace BadOrder.Library.Services
 
             await _userRepository.UpdateAsync(updatedUser);
 
-            return new Updated();
+            return new UserUpdated();
         }
 
         public async Task<UserResult> DeleteAsync(string id)
@@ -94,7 +94,7 @@ namespace BadOrder.Library.Services
             }
 
             await _userRepository.DeleteAsync(id);
-            return new Deleted();
+            return new UserDeleted();
         }
 
         public async Task<UserResult> AuthenticateAsync(AuthenticateUserRequest request)

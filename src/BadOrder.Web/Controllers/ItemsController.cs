@@ -1,14 +1,11 @@
-﻿using BadOrder.Library.Abstractions.DataAccess;
+﻿using BadOrder.Library.Abstractions.Services;
 using BadOrder.Library.Models;
 using BadOrder.Library.Models.Items;
 using BadOrder.Library.Models.Items.Dtos;
-using BadOrder.Library.Models.Orders;
+using BadOrder.Library.Models.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BadOrder.Web.Controllers
@@ -17,29 +14,10 @@ namespace BadOrder.Web.Controllers
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase
     {
-        private readonly ICrudRepository<Item> _repo;
-        public ItemsController(ICrudRepository<Item> repo)
+        private readonly IItemService _itemService;
+        public ItemsController(IItemService itemService)
         {
-            _repo = repo;
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin, User")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
-        public async Task<IActionResult> GetItemsAsync()
-        {
-            var items = await _repo.GetAllAsync();
-            return Ok(items);
-        }
-
-        [HttpGet("{id}")]
-        [Authorize(Roles = "Admin, User")]
-        [ProducesResponseType(200, Type = typeof(Item))]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> GetItemAsync(string id)
-        {
-            var item = await _repo.GetByIdAsync(id);
-            return (item is null) ? item.NotFound(id) : Ok(item);
+            _itemService = itemService;
         }
 
         [HttpPost]
@@ -47,40 +25,40 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(201, Type = typeof(Item))]
         [ProducesResponseType(400, Type = typeof(ErrorResponse))]
         [ProducesResponseType(409, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> CreateItemAsync(NewItemRequest newItem)
+        public async Task<IActionResult> CreateItemAsync(NewItemRequest request)
         {
-            Item item = new()
-            {
-                ProductName = newItem.ProductName,
-                ProductNumber = newItem.ProductNumber,
-                UnitType = newItem.UnitType
-            };
-
-            var createdItem = await _repo.CreateAsync(item);
-            return CreatedAtAction(nameof(GetItemAsync), new { id = createdItem.Id }, createdItem);
+            var item = await _itemService.CreateAsync(request);
+            return item.AsActionResult(nameof(GetByIdAsync), nameof(ItemsController));
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin, User")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
+        public async Task<IActionResult> GetItemsAsync()
+        {
+            var items = await _itemService.GetAllAsync();
+            return items.AsActionResult();
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin, User")]
+        [ProducesResponseType(200, Type = typeof(Item))]
+        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> GetByIdAsync(string id)
+        {
+            var item = await _itemService.GetByIdAsync(id);
+            return item.AsActionResult();
+        }
+
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> UpdateItemAsync(string id, NewItemRequest item)
+        public async Task<IActionResult> UpdateItemAsync(string id, UpdateItemRequest request)
         {
-            var existingItem = await _repo.GetByIdAsync(id);
-            if (existingItem is null)
-            {
-                return existingItem.NotFound(id);
-            }
-
-            Item updatedItem = existingItem with
-            {
-                ProductName = item.ProductName,
-                ProductNumber = item.ProductNumber,
-                UnitType = item.UnitType
-            };
-
-            await _repo.UpdateAsync(updatedItem);
-            return NoContent();
+            var item = await _itemService.UpdateAsync(id, request);
+            return item.AsActionResult();
         }
 
         [HttpDelete("{id}")]
@@ -89,14 +67,8 @@ namespace BadOrder.Web.Controllers
         [ProducesResponseType(404, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> DeleteItemAsync(string id)
         {
-            var existingItem = await _repo.GetByIdAsync(id);
-            if (existingItem is null)
-            {
-                return existingItem.NotFound(id);
-            }
-
-            await _repo.DeleteAsync(id);
-            return NoContent();
+            var item = await _itemService.DeleteAsync(id);
+            return item.AsActionResult();
         }
     }
 }
