@@ -55,10 +55,10 @@ namespace BadOrder.Library.Converters
             : Encoding.UTF8.GetString(reader.ValueSpan);
 
         private static string invalidValue(string value) =>
-            $"enumError\nunitType\n{value}\nInvalid value for enum type";
+            $"enumError\nunitType\n{value} is an invalid value for enum type";
 
         private static string invalidType(string value) =>
-            $"enumError\nunitType\n{value}\nInvalid type for enum value";
+            $"enumError\nunitType\n{value} is an invalid type for enum value";
 
 
     }

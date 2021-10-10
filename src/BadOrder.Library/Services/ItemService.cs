@@ -4,8 +4,11 @@ using BadOrder.Library.Models;
 using BadOrder.Library.Models.Items;
 using BadOrder.Library.Models.Items.Dtos;
 using BadOrder.Library.Models.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +18,14 @@ namespace BadOrder.Library.Services
     public class ItemService : IItemService
     {
         private readonly ICrudRepository<Item> _itemRepository;
+        private readonly string _traceId;
 
-        public ItemService(ICrudRepository<Item> itemRepository)
+        public ItemService(ICrudRepository<Item> itemRepository, IHttpContextAccessor contextAccessor)
         {
             _itemRepository = itemRepository;
+            
+            var httpContext = contextAccessor.HttpContext;
+            _traceId = Activity.Current?.Id ?? httpContext?.TraceIdentifier;
         }
 
         public async Task<ItemResult> CreateAsync(NewItemRequest request)
@@ -33,7 +40,7 @@ namespace BadOrder.Library.Services
             var existingItem = await _itemRepository.GetByIdAsync(id);
             if (existingItem is null)
             {
-                return new ItemNotFound(NotFoundError(nameof(id), id));
+                return new ItemNotFound(ResultErrors.NotFound<Item>(_traceId, id));
             }
 
             await _itemRepository.DeleteAsync(id);
@@ -50,7 +57,7 @@ namespace BadOrder.Library.Services
         {
             var result = await _itemRepository.GetByIdAsync(id);
             return result is null
-                ? new ItemNotFound(NotFoundError(nameof(id), id))
+                ? new ItemNotFound(ResultErrors.NotFound<Item>(_traceId, id))
                 : new ItemFound(result);
         }
 
@@ -59,12 +66,13 @@ namespace BadOrder.Library.Services
             var existingItem = await _itemRepository.GetByIdAsync(id);
             if (existingItem is null) 
             {
-                return new ItemNotFound(NotFoundError(nameof(id), id));
+                
+                return new ItemNotFound(ResultErrors.NotFound<Item>(_traceId, id));
             }
 
             var updatedItem = ToUpdatedItem(existingItem, request);
-
             await _itemRepository.UpdateAsync(updatedItem);
+
             return new ItemUpdated();
         }
 
@@ -86,7 +94,5 @@ namespace BadOrder.Library.Services
             return updatedItem;
         }
 
-        private static ErrorEntry NotFoundError(string field, string value) => new()
-        { Field = field, Value = value, Message = "Item not found" };
     }
 }

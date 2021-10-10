@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BadOrder.Library.Filters;
 
 namespace BadOrder.Web
 {
@@ -30,19 +31,12 @@ namespace BadOrder.Web
             services.AddControllers(options =>
             {
                 options.SuppressAsyncSuffixInActionNames = false;
+                options.Filters.Add(new BetterJsonErrorMessage());
             })
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.Converters.Add(new UnitTypeEnumConverter());
-            })
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.InvalidModelStateResponseFactory = actionContext =>
-                {
-                    var modelState = actionContext.ModelState;
-                    return new BadRequestObjectResult(modelState.ToErrorResponseModel());
-                };
             });
 
             return services;
@@ -82,6 +76,8 @@ namespace BadOrder.Web
             
             var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
             services.AddSingleton(mongoDbSettings);
+
+            var mongoClient = new MongoClient(mongoDbSettings.ConnectionString);
             services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoDbSettings.ConnectionString));
             
             services.AddSingleton(typeof(ICrudRepository<>), typeof(MongoCrudRepository<>));

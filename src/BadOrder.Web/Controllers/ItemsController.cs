@@ -4,6 +4,7 @@ using BadOrder.Library.Models.Items;
 using BadOrder.Library.Models.Items.Dtos;
 using BadOrder.Library.Models.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,18 +23,18 @@ namespace BadOrder.Web.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(201, Type = typeof(Item))]
-        [ProducesResponseType(400, Type = typeof(ErrorResponse))]
-        [ProducesResponseType(409, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Item))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> CreateItemAsync(NewItemRequest request)
         {
-            var item = await _itemService.CreateAsync(request);
-            return item.AsActionResult(nameof(GetByIdAsync), nameof(ItemsController));
+            var res = await _itemService.CreateAsync(request);
+            return res.AsActionResult(nameof(GetByIdAsync));
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin, User")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Item>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Item>))]
         public async Task<IActionResult> GetItemsAsync()
         {
             var items = await _itemService.GetAllAsync();
@@ -42,8 +43,8 @@ namespace BadOrder.Web.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin, User")]
-        [ProducesResponseType(200, Type = typeof(Item))]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Item))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> GetByIdAsync(string id)
         {
             var item = await _itemService.GetByIdAsync(id);
@@ -53,8 +54,9 @@ namespace BadOrder.Web.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> UpdateItemAsync(string id, UpdateItemRequest request)
         {
             var item = await _itemService.UpdateAsync(id, request);
@@ -63,8 +65,8 @@ namespace BadOrder.Web.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> DeleteItemAsync(string id)
         {
             var item = await _itemService.DeleteAsync(id);

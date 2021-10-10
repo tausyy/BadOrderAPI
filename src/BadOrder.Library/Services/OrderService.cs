@@ -4,8 +4,10 @@ using BadOrder.Library.Models;
 using BadOrder.Library.Models.Orders;
 using BadOrder.Library.Models.Orders.Dtos;
 using BadOrder.Library.Models.Services;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -18,17 +20,21 @@ namespace BadOrder.Library.Services
 
         private readonly IUserRepository _userRepository;
         private readonly IOrderRepository _orderRepository;
+        private readonly string _traceId;
 
-        public OrderService(IOrderRepository orderRepository, IUserRepository userRepository)
+        public OrderService(IOrderRepository orderRepository, IUserRepository userRepository, IHttpContextAccessor contextAccessor)
         {
             _orderRepository = orderRepository;
             _userRepository = userRepository;
+
+            var httpContext = contextAccessor.HttpContext;
+            _traceId = Activity.Current?.Id ?? httpContext?.TraceIdentifier;
         }
 
         public async Task<OrderResult> New(IEnumerable<Claim> userClaims)
         {
             var emailFound = TryGetEmail(userClaims, out var userEmail);
-            if (!emailFound) return new OrderUnauthorized(UnauthorizedError());
+            if (!emailFound) return new OrderUnauthorized(ResultErrors.Unauthorized(_traceId));
 
             await DeleteExistingOrder(userEmail);
 
@@ -50,22 +56,22 @@ namespace BadOrder.Library.Services
         public async Task<OrderResult> Get(IEnumerable<Claim> userClaims)
         {
             var emailFound = TryGetEmail(userClaims, out var userEmail);
-            if (!emailFound) return new OrderUnauthorized(UnauthorizedError());
+            if (!emailFound) return new OrderUnauthorized(ResultErrors.Unauthorized(_traceId));
 
             var order = await _orderRepository.GetByOwnerEmailAsync(userEmail);
 
             return order is null
-                ? new OrderNotFound(NotFoundError(userEmail))
+                ? new OrderNotFound(ResultErrors.NotFound<Order>(_traceId, $"user/{userEmail}"))
                 : new OrderFound(order);
         }
 
         public async Task<OrderResult> Update(UpdateOrderRequest request, IEnumerable<Claim> userClaims)
         {
             var emailFound = TryGetEmail(userClaims, out var userEmail);
-            if (!emailFound) return new OrderUnauthorized(UnauthorizedError());
+            if (!emailFound) return new OrderUnauthorized(ResultErrors.Unauthorized(_traceId));
 
             var order = await _orderRepository.GetByOwnerEmailAsync(userEmail);
-            if (order is null) return new OrderNotFound(NotFoundError(userEmail));
+            if (order is null) return new OrderNotFound(ResultErrors.NotFound<Order>(_traceId, $"user/{userEmail}"));
 
             Order updatedOrder = order with
             {
@@ -80,10 +86,10 @@ namespace BadOrder.Library.Services
         public async Task<OrderResult> Delete(IEnumerable<Claim> userClaims)
         {
             var emailFound = TryGetEmail(userClaims, out var userEmail);
-            if (!emailFound) return new OrderUnauthorized(UnauthorizedError());
+            if (!emailFound) return new OrderUnauthorized(ResultErrors.Unauthorized(_traceId));
 
             var order = await _orderRepository.GetByOwnerEmailAsync(userEmail);
-            if (order is null) return new OrderNotFound(NotFoundError(userEmail));
+            if (order is null) return new OrderNotFound(ResultErrors.NotFound<Order>(_traceId, $"user/{userEmail}"));
 
             await _orderRepository.DeleteAsync(order.Id);
 
@@ -116,12 +122,5 @@ namespace BadOrder.Library.Services
 
             return email is not null;
         }
-
-        private static ErrorEntry NotFoundError(string userEmail) => new()
-            { Field = null, Value = userEmail, Message = "No order found for current user" };
-
-        private static ErrorEntry UnauthorizedError() => new() 
-            { Field = null, Value = null, Message = "Unauthorized" };
-
     }
 }

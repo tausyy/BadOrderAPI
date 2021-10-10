@@ -4,10 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BadOrder.Library.Models
+namespace BadOrder.Library.Models.Users.Dtos
 {
-    public record AuthSuccess
-    {
-        public string Token { get; init; }
-    }
+    public record UserAuthenticated(string Token);
 }

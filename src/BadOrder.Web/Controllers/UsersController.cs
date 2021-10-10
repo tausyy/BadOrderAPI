@@ -33,7 +33,7 @@ namespace BadOrder.Web.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(404, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> GetByIdAsync(string id)
         {
             var request = await _userService.GetByIdAsync(id);
@@ -42,17 +42,17 @@ namespace BadOrder.Web.Controllers
 
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(NewUser))]
-        [ProducesResponseType(400, Type = typeof(ErrorResponse))]
-        [ProducesResponseType(409, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(400, Type = typeof(ValidationProblemDetails))]
+        [ProducesResponseType(409, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> CreateAsync(NewUserRequest newUser)
         {
             var result = await _userService.CreateAsync(newUser);
-            return result.AsActionResult(nameof(GetByIdAsync), nameof(UsersController));
+            return result.AsActionResult(nameof(GetByIdAsync));
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(404, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> UpdateAsync(string id, UpdateUserRequest user)
         {
             var result = await _userService.UpdateAsync(id, user);
@@ -61,7 +61,7 @@ namespace BadOrder.Web.Controllers
 
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
-        [ProducesResponseType(404, Type = typeof(ErrorResponse))]
+        [ProducesResponseType(404, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> DeleteAsync(string id)
         {
             var request = await _userService.DeleteAsync(id);
@@ -69,7 +69,9 @@ namespace BadOrder.Web.Controllers
         }
 
         [Route("auth")]
-        [Authorize(Roles = "Admin, User")]
+        [AllowAnonymous]
+        [ProducesResponseType(200, Type = typeof(UserAuthenticated))]
+        [ProducesResponseType(401, Type = typeof(ProblemDetails))]
         [HttpPost]
         public async Task<IActionResult> AuthenticateAsync(AuthenticateUserRequest user)
         {
