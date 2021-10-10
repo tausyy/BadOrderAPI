@@ -1,4 +1,5 @@
 ﻿using BadOrder.Library.Abstractions.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,16 +11,20 @@ namespace BadOrder.Library.Models.Services
 {
     public static class ResultExtensions
     {
-        public static IActionResult AsActionResult(this ItemResult result, string actionName = default, string controllerName = default) => result switch
+        public static IActionResult AsActionResult(this ItemResult result, string actionName = null) => result switch
         {
             ItemUpdated or ItemDeleted => new NoContentResult(),
             AllItems items => new OkObjectResult(items.Result),
             ItemFound item => new OkObjectResult(item.Result),
             ItemNotFound item => new NotFoundObjectResult(item.Result.AsErrorResonse()),
-            ItemCreated request =>
-                new CreatedAtActionResult(actionName, controllerName, new { id = request.Result.Id }, request.Result),
+            
+            ItemCreated request when actionName is not null =>
+                new CreatedAtActionResult(actionName, null, new { id = request.Result.Id }, request.Result),
+            
+            ItemCreated when actionName is null =>
+                new StatusCodeResult(StatusCodes.Status201Created),
 
-            _ => new StatusCodeResult(500)
+            _ => new StatusCodeResult(StatusCodes.Status500InternalServerError)
         };
 
         public static IActionResult AsActionResult(this OrderResult result) => result switch
@@ -30,10 +35,10 @@ namespace BadOrder.Library.Models.Services
             OrderNotFound order => new NotFoundObjectResult(order.Result.AsErrorResonse()),
             OrderUnauthorized order => new UnauthorizedObjectResult(order.Result.AsErrorResonse()),
 
-            _ => new StatusCodeResult(500)
+            _ => new StatusCodeResult(StatusCodes.Status500InternalServerError)
         };
 
-        public static IActionResult AsActionResult(this UserResult result, string actionName = default, string controllerName = default) => result switch
+        public static IActionResult AsActionResult(this UserResult result, string actionName = null) => result switch
         {
             UserUpdated or UserDeleted => new NoContentResult(),
             UserFound request => new OkObjectResult(request.Result),
@@ -41,11 +46,14 @@ namespace BadOrder.Library.Models.Services
             AuthenticateSuccess request => new OkObjectResult(request.Result),
             EmailInUse request => new ConflictObjectResult(request.Result.AsErrorResonse()),
             InvalidRole request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
-            AuthenticateFailur request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
-            UserCreated request =>
-                new CreatedAtActionResult(actionName, controllerName, new { id = request.Result.Id }, request.Result),
+            AuthenticateFailur request => new UnauthorizedObjectResult(request.Result.AsErrorResonse()),
+            UserNotFound request => new BadRequestObjectResult(request.Result.AsErrorResonse()),
+            UserCreated request when actionName is not null =>
+                new CreatedAtActionResult(actionName, null, new { id = request.Result.Id }, request.Result),
+            UserCreated when actionName is null =>
+                new StatusCodeResult(StatusCodes.Status201Created),
 
-            _ => new StatusCodeResult(500)
+            _ => new StatusCodeResult(StatusCodes.Status500InternalServerError)
         };
     }
 }
